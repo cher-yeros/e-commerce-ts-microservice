@@ -12,8 +12,8 @@ import jwt, { JwtPayload, Secret } from "jsonwebtoken";
 import dotenv from "dotenv";
 import { Request, Response } from "express";
 import { PubSub } from "graphql-subscriptions";
+import { UserType } from "./models/user.model";
 import schema from "./schema";
-import { User } from "./types/user";
 import sequelize from "./utils/db_connection";
 
 const pubSub = new PubSub();
@@ -31,7 +31,7 @@ interface MyContext {
 }
 
 interface CustomJwtPayload extends JwtPayload {
-  user: User;
+  user: UserType;
 }
 
 var corsOptions = {
@@ -42,6 +42,7 @@ var corsOptions = {
 const server = new ApolloServer<MyContext>({
   schema: schema,
   plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+  introspection: true,
 });
 
 server.start().then(() => {
@@ -69,7 +70,7 @@ server.start().then(() => {
             //   },
             // });
           } else {
-            (req as Request & { user: User }).user = user;
+            (req as Request & { user: UserType }).user = user;
           }
         } else {
           // throw new GraphQLError("Token not found!", {

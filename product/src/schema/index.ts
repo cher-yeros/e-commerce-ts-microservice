@@ -1,12 +1,11 @@
-import _ from "lodash";
 import { makeExecutableSchema } from "@graphql-tools/schema";
-import { merge } from "lodash";
 import { GraphQLScalarType, Kind } from "graphql";
-import { userResolvers, userSchema } from "./user";
-import { notificationResolvers, notificationSchema } from "./notification";
-import { productResolvers, productSchema } from "./product";
+import { merge } from "lodash";
+import { notificationSchema } from "./notification";
 import { orderResolver, orderSchema } from "./order";
-import { paymentResolvers, paymentSchema } from "./payment";
+import { paymentSchema } from "./payment";
+import { productResolvers, productSchema } from "./product";
+import { userSchema } from "./user";
 
 const dateScalar = {
   Date: new GraphQLScalarType({
@@ -61,11 +60,11 @@ const schema = makeExecutableSchema({
   ],
   resolvers: merge(
     dateScalar,
-    userResolvers,
-    notificationResolvers,
+    // userResolvers,
+    // notificationResolvers,
     productResolvers,
-    orderResolver,
-    paymentResolvers
+    orderResolver
+    // paymentResolvers
   ),
 });
 

@@ -1,49 +1,94 @@
-import prisma from "../utils/db_connection";
+import User from "../models/user.model";
+import { CreateUserInput, UpdateUserInput } from "../types/schema-input";
+import { PubSub } from "graphql-subscriptions";
+
+const pubsub = new PubSub();
 
 export const userSchema = `#graphql
-    type User {
-       id: ID!
-       username: String!
-       email: String!
-       firstName: String!
-       lastName: String!
-       age: Int
-       gender: String
-    
-    }
+  type User {
+    id: ID!
+    name: String!
+    email: String!
+    products: [Product!]!
+    orders: [Order!]!
+    notifications: [Notification!]!
+    payments: [Payment!]!
+  }
 
-    extend type Query {
-        hello: String
-    }
+  input CreateUserInput {
+    name: String!
+    email: String!
+    password: String!
+  }
 
-    extend type Mutation {
-        createUser(username: String, email: String, firstName: String, lastName: String, age: Int, gender: String): User
-    }
+  input UpdateUserInput {
+    id: ID!
+    name: String
+    email: String
+  }
+
+  type Query {
+    getUser(id: ID!): User
+    getUsers: [User!]!
+  }
+
+  type Mutation {
+    createUser(input: CreateUserInput!): User
+    updateUser(input: UpdateUserInput!): User
+    deleteUser(id: ID!): Boolean
+  }
+
+  type Subscription {
+    userCreated: User
+    userUpdated: User
+    userDeleted: ID
+  }
 `;
-
-// src/schema/resolvers.ts
 
 export const userResolvers = {
   Query: {
-    hello: () => {
-      return "Hello, world!";
+    getUser: async (parent: any, { id }: { id: string }) => {
+      // Retrieve User logic
+      const user = await User.findByPk(id);
+      return user;
+    },
+    getUsers: async () => {
+      // Retrieve all Users logic
+      const users = await User.findAll();
+      return users;
     },
   },
   Mutation: {
-    createUser: async (
-      _: any,
-      { firstName, lastName }: { firstName: string; lastName: string }
-    ) => {
-      console.log({ firstName, lastName });
-      const newUser = await prisma.user.create({
-        data: {
-          fullname: `${firstName} ${lastName}`,
-          email: "yerosh@gmail.com",
-        },
-      });
-
-      console.log(newUser);
-      return newUser;
+    createUser: async (parent: any, { input }: { input: CreateUserInput }) => {
+      // Create User logic
+      const user = await User.create(input);
+      return user;
+    },
+    updateUser: async (parent: any, { input }: { input: UpdateUserInput }) => {
+      const user = await User.update(
+        { name: input.name },
+        { where: { id: input.id } }
+      );
+      return user;
+    },
+    deleteUser: async (parent: any, { id }: { id: string }) => {
+      // Delete User logic
+      await User.destroy({ where: { id } });
+      return true;
+    },
+  },
+  Subscription: {
+    userCreated: {
+      // User created subscription logic
+      subscribe: () => pubsub.asyncIterator("USER_CREATED"),
+    },
+    userUpdated: {
+      // User updated subscription logic
+      subscribe: () => pubsub.asyncIterator("USER_UPDATED"),
+    },
+    userDeleted: {
+      // User deleted subscription logic
+      subscribe: () => pubsub.asyncIterator("USER_DELETED"),
     },
   },
 };

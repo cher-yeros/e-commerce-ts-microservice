@@ -35,12 +35,6 @@ class Product extends Model<ProductType, ProductCreationAttributes> {
     type: DataType.STRING,
     allowNull: false,
   })
-  serialNo!: string;
-
-  @Column({
-    type: DataType.STRING,
-    allowNull: false,
-  })
   name!: string;
 
   @Column({

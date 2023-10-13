@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node dist/index.js",
+    "start": "ts-node src/index.ts",
     "start:dev": "nodemon --watch 'src/**/*.ts' --exec ts-node-dev src/index.ts",
     "start:dev2": "nodemon --watch 'src/**/*.ts' --exec 'node -r ts-node/register' src/index.ts",
     "db:migrate": "SET NODE_ENV=MIGRATION& ts-node src/utils/db_connection",
